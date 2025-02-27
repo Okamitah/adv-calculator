@@ -57,11 +57,8 @@ def calculate(separated_expression: list):
 operation = "  2+3-  4*2 +2+2-3/2*4*  5+3 -2-9/     7+4-2"
 
 
-print("\n",operation)
-print("\nSeparating:\n")
-print(separate_expression(operation))
-print("\nCalculating:\n")
-print(calculate(separate_expression(operation)))
+print("\nWelcome to my basic calculator!\n")
+print("Allowed operators: +, -, * and /\n")
 exp = ""
 while exp != "exit":
     exp = input("> ")
