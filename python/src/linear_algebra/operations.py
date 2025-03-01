@@ -14,7 +14,7 @@ def separate_matrix(expression):
 operations_map = {
     '+': lambda x,y: x+y,
     '-': lambda x,y: x-y,
-    '.': lambda x,y: x.dot(y),
+    '@': lambda x,y: x@y,
     '*': lambda x,y: x*y,
     '**': lambda x,y: x+y,
     '..': lambda x,y: x+y,
@@ -35,37 +35,36 @@ def split_op(expression:str, operations) -> list:
     return expression_list
 
 def separate_expression(expression:str) -> list:
-    operations = ('*','/','+','-')
+    operations = ('*','/','+','-','@')
     expr = split_op(expression,operations)
     return expr
 
 def calculate(expression) -> float:
     expression = separate_expression(expression)
     addsub = ('+','-')
-    muldiv = ('*','/')
+    muldiv = ('*','@','/')
     calc = []
     for index in range(1,len(expression),2):
-        if expression[index] in addsub:
-            calc.append(expression[index-1])
-            calc.append(expression[index])
         if expression[index] in muldiv:
             mat1 = separate_matrix(expression[index-1])
             mat2 = separate_matrix(expression[index+1])
             calc.append(operations_map[expression[index]](mat1,mat2))
+        else:
+            calc.append(expression[index-1])
+            calc.append(expression[index])
     if expression[-2] in addsub:
         calc.append(expression[-1])
-    print(f"Calc: {calc}")
-    print(f"expression: {expression}")
     for index in range(1,len(calc),2):
         mat1 = separate_matrix(calc[index-1])
         mat2 = separate_matrix(calc[index+1])
         calc[index+1] = operations_map[calc[index]](mat1,mat2)
+
     return calc[-1]
 
 
 print(f"Separate matrix:{separate_matrix('1, 5  ,2 ; 2,4,8')}") 
 print(f"Separate expression:{separate_expression('1, 5  ,2 ; 2,4*5,8 + 2,2,2;4,1*4,4')}") 
-print(f"calculate expression:{calculate('1, 4,2+5,8,3 * 3,3,3')}") 
+print(f"calculate expression:{calculate('1, 4,2+5,8,3 @ 3;3;3')}") 
 
 print("\nWelcome to my matrix calculator!\n")
 print("Allowed operators: +, -, * and /\n")
