@@ -1,5 +1,6 @@
 def separate_expression(expression: str):
 
+    """Function that takes a string and gives back a list"""
     expression = expression.replace(" ","")
 
     ops = ['+', '-','*', '/']
@@ -35,30 +36,24 @@ operations_map = {
 
 def calculate_list(expression: list):
 
-    addsub = ('+','-') # 2*2*2 + 100
     muldiv = ('*','/')
 
     for i in range(1,len(expression),2):
-
         if expression[i] in muldiv:
             expression[i+1] = operations_map[expression[i]](expression[i+1],expression[i-1])
-            expression.pop(i-1)
-            expression.pop(i)
-        elif expression[i] in addsub:
-            expression.append(expression[i-1])
-            expression.append(expression[i])
-    
+            expression[i-1] = '%'
+            expression[i] = '%'
+        
+    expression = [ch for ch in expression if ch != '%']
+
     for i in range(1,len(expression),2):
         expression[i+1] = operations_map[expression[i]](expression[i-1],expression[i+1])
+
     return expression[-1]
 
 
 def calculate(expression: str):
     separated_expression = separate_expression(expression)
-
-    for index,expression in enumerate(separated_expression):
-        if type(expression) == list:
-            separated_expression[index] = calculate_list(expression)
     return calculate_list(separated_expression)
 
 
