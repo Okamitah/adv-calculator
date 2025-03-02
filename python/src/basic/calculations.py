@@ -2,14 +2,9 @@ def separate_expression(expression: str):
 
     expression = expression.replace(" ","")
 
-    addsub = ['+', '-']
-    muldiv = ['*', '/']
+    ops = ['+', '-','*', '/']
 
-    ls = split_ops(expression, addsub)
-
-    for el in range(len(ls)):
-        if any(element in ls[el] for element in muldiv):
-            ls[el] = split_ops(ls[el], muldiv)
+    ls = split_ops(expression, ops)
 
     return ls
 
@@ -40,13 +35,26 @@ operations_map = {
 
 def calculate_list(expression: list):
 
-    for i in range(1,len(expression),2):
-        expression[i+1] = operations_map[expression[i]](expression[i+1],expression[i-1])
+    addsub = ('+','-') # 2*2*2 + 100
+    muldiv = ('*','/')
 
+    for i in range(1,len(expression),2):
+
+        if expression[i] in muldiv:
+            expression[i+1] = operations_map[expression[i]](expression[i+1],expression[i-1])
+            expression.pop(i-1)
+            expression.pop(i)
+        elif expression[i] in addsub:
+            expression.append(expression[i-1])
+            expression.append(expression[i])
+    
+    for i in range(1,len(expression),2):
+        expression[i+1] = operations_map[expression[i]](expression[i-1],expression[i+1])
     return expression[-1]
 
 
-def calculate(separated_expression: list):
+def calculate(expression: str):
+    separated_expression = separate_expression(expression)
 
     for index,expression in enumerate(separated_expression):
         if type(expression) == list:
@@ -54,12 +62,10 @@ def calculate(separated_expression: list):
     return calculate_list(separated_expression)
 
 
-operation = "  2+3-  4*2 +2+2-3/2*4*  5+3 -2-9/     7+4-2"
-
 
 print("\nWelcome to my basic calculator!\n")
 print("Allowed operators: +, -, * and /\n")
 exp = ""
 while exp != "exit":
     exp = input("> ")
-    print(calculate(separate_expression(exp)))
+    print(calculate(exp))
