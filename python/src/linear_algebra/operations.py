@@ -64,7 +64,7 @@ def calculate(expression) -> float:
 
 print(f"Separate matrix:{separate_matrix('1, 5  ,2 ; 2,4,8')}") 
 print(f"Separate expression:{separate_expression('1, 5  ,2 ; 2,4*5,8 + 2,2,2;4,1*4,4')}") 
-print(f"calculate expression:{calculate('1, 4,2+5,8,3 @ 3;3;3')}") 
+print(f"calculate expression:{calculate('1, 4,2+5,8,3 @ 3;3;3+  2,2,2')}") 
 
 print("\nWelcome to my matrix calculator!\n")
 print("Allowed operators: +, -, * and /\n")

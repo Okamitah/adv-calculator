@@ -1,6 +1,7 @@
 def separate_expression(expression: str):
 
     """Function that takes a string and gives back a list"""
+
     expression = expression.replace(" ","")
 
     ops = ['+', '-','*', '/']
@@ -25,6 +26,8 @@ def split_ops(expression, operations):
 
     return expression_list
 
+# Yooooo
+# Test Test
 
 operations_map = {
     '+': lambda x,y : float(x) + float(y),
@@ -32,6 +35,23 @@ operations_map = {
     '*': lambda x,y : float(x) * float(y),
     '/': lambda x,y : float(y) / float(x),
 }
+
+def find_closing_parentheses(start:int, separated_expression:list):
+    open_parens = 1 
+    index = 1
+    for ind, elem in enumerate(separated_expression[start+1:]):
+        if elem == '(':
+            open_parens += 1 
+        elif elem == ')':
+            open_parens -= 1 
+        if open_parens == 0:
+            index += ind
+            break
+    return index+start
+
+
+# idk what is was
+## *Eeee*
 
 
 def calculate_list(expression: list):
