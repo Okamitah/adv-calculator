@@ -2,9 +2,14 @@ use std::io;
 
 fn main() {
     println!("Welcome to my basic calculator!");
-    let expression = start_calculator();
-    let xp = separate_expression(&expression);
-    println!("{:?}", tokenize(xp));
+    loop {
+        let expression = start_calculator();
+        let xp = separate_expression(&expression);
+        //println!("{:?}", tokenize(xp));
+        //println!("{:?}", shunting_yard(tokenize(xp)));
+        println!("{:?}", evaluate(shunting_yard(tokenize(xp))));
+        
+    }
 }
 
 fn start_calculator() -> String {
@@ -21,6 +26,7 @@ enum Token {
     Minus,
     Multiply,
     Divide,
+    Exponent,
     LeftParen,
     RightParen
 }
@@ -34,17 +40,17 @@ fn tokenize(expr_vec : Vec<String>) -> Vec<Token> {
             "-" => tokens.push(Token::Minus),
             "*" => tokens.push(Token::Multiply),
             "/" => tokens.push(Token::Divide),
+            "^" => tokens.push(Token::Exponent),
             "(" => tokens.push(Token::LeftParen),
             ")" => tokens.push(Token::RightParen),
             _ => {
                 match element.parse::<f64>() {
                     Ok(num) => tokens.push(Token::Number(num)),
-                    Err(_) => panic!("Invalid Token: {}", element)
+                    Err(_) => println!("Invalid Token: {}", element)
                 }
             }
         }
     }
-
     tokens
 }
 
@@ -54,7 +60,9 @@ fn separate_expression(expression: &str)-> Vec<String> {
     let operators = ['+','-','*','/','(',')','^','%'];
     for char in expression.chars() {
         if operators.contains(&char) {
-            xp.push(side.trim().to_string());
+            if !side.trim().is_empty() {
+                xp.push(side.trim().to_string());
+            }
             side = String::new();
             xp.push(char.to_string());
         }
@@ -62,6 +70,89 @@ fn separate_expression(expression: &str)-> Vec<String> {
             side.push(char);
         }
     }
-    if !side.is_empty() {xp.push(side.trim().to_string())}
+    if !side.trim().is_empty() { xp.push(side.trim().to_string()); }
     xp
+}
+
+fn precedence(token: &Token) -> u8 {
+    let p = match token {
+        Token::Minus | Token::Plus => 1,
+        Token::Multiply | Token::Divide => 2,
+        Token::Exponent => 3,
+        _ => 0
+    };
+    p
+}
+
+fn shunting_yard(tokens: Vec<Token>) -> Vec<Token> {
+    let mut output = Vec::new();
+    let mut operators = Vec::new();
+    for token in tokens {
+        match token {
+            Token::Number(_) => output.push(token),
+            Token::Plus | Token::Minus | Token::Multiply | Token::Divide | Token::Exponent => {
+                while let Some(op) = operators.last() {
+                    if precedence(op) >= precedence(&token) {
+                        output.push(operators.pop().unwrap());
+                    } else {
+                        break;
+                    }
+                }
+                operators.push(token);
+            }
+            Token::LeftParen => operators.push(token),
+            Token::RightParen => {
+                while let Some(op) = operators.pop() {
+                    if op == Token::LeftParen {
+                        break;
+                    }
+                    output.push(op);
+                }
+            }
+        }
+    }
+
+    while let Some(op) = operators.pop() {
+        output.push(op);
+    }
+    output
+}
+
+fn evaluate(postfix: Vec<Token>) -> f64 {
+    let mut stack = Vec::new();
+    
+    for token in postfix {
+        match token {
+            Token::Number(num) => stack.push(num),
+            Token::Plus => {
+                let x = stack.pop().unwrap();
+                let y = stack.pop().unwrap();
+                stack.push(y+x);
+            }
+            Token::Minus => {
+                let x = stack.pop().unwrap();
+                let y = stack.pop().unwrap();
+                stack.push(y-x);
+            }
+            Token::Multiply => {
+                let x = stack.pop().unwrap();
+                let y = stack.pop().unwrap();
+                stack.push(y*x);
+            }
+            Token::Divide => {
+                let x = stack.pop().unwrap();
+                let y = stack.pop().unwrap();
+                if y == 0.0 {panic!("Division by 0!");}
+                stack.push(y/x);
+            }
+            Token::Exponent => {
+                let x = stack.pop().unwrap();
+                let y = stack.pop().unwrap();
+                stack.push(f64::powf(y,x));
+            }
+            _ => println!("Unexpected token")
+        }
+    }
+
+    stack.pop().unwrap()
 }
