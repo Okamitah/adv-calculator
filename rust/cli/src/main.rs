@@ -5,8 +5,6 @@ fn main() {
     loop {
         let expression = start_calculator();
         let xp = separate_expression(&expression);
-        //println!("{:?}", tokenize(xp));
-        //println!("{:?}", shunting_yard(tokenize(xp)));
         println!("{:?}", evaluate(shunting_yard(tokenize(xp))));
         
     }
@@ -27,6 +25,11 @@ enum Token {
     Multiply,
     Divide,
     Exponent,
+    Derive,
+    Integrate,
+    Log,
+    Ln,
+    Exp,
     LeftParen,
     RightParen
 }
@@ -43,6 +46,11 @@ fn tokenize(expr_vec : Vec<String>) -> Vec<Token> {
             "^" => tokens.push(Token::Exponent),
             "(" => tokens.push(Token::LeftParen),
             ")" => tokens.push(Token::RightParen),
+            "log" => tokens.push(Token::Log),
+            "ln" => tokens.push(Token::Ln),
+            "exp" => tokens.push(Token::Exp),
+            "d" => tokens.push(Token::Derive),
+            "i" => tokens.push(Token::Integrate),
             _ => {
                 match element.parse::<f64>() {
                     Ok(num) => tokens.push(Token::Number(num)),
@@ -79,6 +87,8 @@ fn precedence(token: &Token) -> u8 {
         Token::Minus | Token::Plus => 1,
         Token::Multiply | Token::Divide => 2,
         Token::Exponent => 3,
+        Token::Log | Token::Ln | Token::Exp => 4,
+        Token::Derive | Token::Integrate => 5,
         _ => 0
     };
     p
@@ -100,6 +110,16 @@ fn shunting_yard(tokens: Vec<Token>) -> Vec<Token> {
                 }
                 operators.push(token);
             }
+            Token::Log | Token::Ln | Token::Exp | Token::Derive | Token::Integrate => {
+                while let Some(op) = operators.last() {
+                    if precedence(op) > precedence(&token) {
+                        output.push(operators.pop().unwrap());
+                    } else {
+                        break;
+                    }
+                }
+                operators.push(token);
+            }
             Token::LeftParen => operators.push(token),
             Token::RightParen => {
                 while let Some(op) = operators.pop() {
@@ -109,6 +129,7 @@ fn shunting_yard(tokens: Vec<Token>) -> Vec<Token> {
                     output.push(op);
                 }
             }
+            _ => println!("Unrecognized operator")
         }
     }
 
@@ -150,6 +171,26 @@ fn evaluate(postfix: Vec<Token>) -> f64 {
                 let y = stack.pop().unwrap();
                 stack.push(f64::powf(y,x));
             }
+            Token::Log => {
+                let x = stack.pop().unwrap();
+                if x <= 0.0 {
+                    panic!("Logarithm of non-positive number!");
+                }
+                stack.push(f64::log(x, 10.0));
+            }
+            Token::Ln => {
+                let x = stack.pop().unwrap();
+                if x <= 0.0 {
+                    panic!("Logarithm of non-positive number!");
+                }
+                stack.push(x.ln());
+            }
+
+            Token::Exp => {
+                let x = stack.pop().unwrap();
+                stack.push(f64::exp(x));
+            }
+
             _ => println!("Unexpected token")
         }
     }
