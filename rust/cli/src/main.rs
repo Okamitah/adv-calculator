@@ -129,7 +129,6 @@ fn shunting_yard(tokens: Vec<Token>) -> Vec<Token> {
                     output.push(op);
                 }
             }
-            _ => println!("Unrecognized operator")
         }
     }
 
@@ -185,7 +184,6 @@ fn evaluate(postfix: Vec<Token>) -> f64 {
                 }
                 stack.push(x.ln());
             }
-
             Token::Exp => {
                 let x = stack.pop().unwrap();
                 stack.push(f64::exp(x));
